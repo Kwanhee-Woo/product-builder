@@ -89,7 +89,6 @@
       transition: color 0.3s;
     }
 
-    /* 다크모드 토글 */
     .theme-toggle {
       position: absolute;
       top: 20px;
@@ -97,12 +96,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-
-    .toggle-label {
-      font-size: 13px;
-      color: var(--text-color);
-      transition: color 0.3s;
     }
 
     .toggle-switch {
@@ -154,7 +147,6 @@
       font-size: 16px;
     }
 
-    /* 로또 목록 */
     .lotto-list {
       display: flex;
       flex-direction: column;
@@ -222,17 +214,16 @@
 <body>
 
 <div class="container">
-  <!-- 다크/라이트 모드 토글 -->
   <div class="theme-toggle">
-    <span class="theme-icon">☀️</span>
+    <span class="theme-icon">&#9728;&#65039;</span>
     <label class="toggle-switch">
       <input type="checkbox" id="themeToggle" />
       <span class="toggle-track"></span>
     </label>
-    <span class="theme-icon">🌙</span>
+    <span class="theme-icon">&#127769;</span>
   </div>
 
-  <h1>🎰 로또 번호 자동 생성기</h1>
+  <h1>&#127920; 로또 번호 자동 생성기</h1>
 
   <div class="controls">
     <button onclick="generateLotto()">
@@ -249,14 +240,13 @@
 </div>
 
 <script>
-  const html = document.documentElement;
-  const toggle = document.getElementById('themeToggle');
+  var html = document.documentElement;
+  var toggle = document.getElementById('themeToggle');
 
-  // 저장된 테마 불러오기
-  const saved = localStorage.getItem('theme') || 'light';
+  var saved = localStorage.getItem('theme') || 'light';
   setTheme(saved);
 
-  toggle.addEventListener('change', () => {
+  toggle.addEventListener('change', function() {
     setTheme(toggle.checked ? 'dark' : 'light');
   });
 
@@ -275,54 +265,53 @@
   }
 
   function generateNumbers(includeBonus) {
-    const numbers = [];
-
+    var numbers = [];
     while (numbers.length < 6) {
-      const num = Math.floor(Math.random() * 45) + 1;
-      if (!numbers.includes(num)) numbers.push(num);
+      var num = Math.floor(Math.random() * 45) + 1;
+      if (numbers.indexOf(num) === -1) numbers.push(num);
     }
+    numbers.sort(function(a, b) { return a - b; });
 
-    numbers.sort((a, b) => a - b);
-
-    let bonus = null;
+    var bonus = null;
     if (includeBonus) {
-      while (true) {
-        const bonusNum = Math.floor(Math.random() * 45) + 1;
-        if (!numbers.includes(bonusNum)) { bonus = bonusNum; break; }
-      }
+      var bonusNum;
+      do {
+        bonusNum = Math.floor(Math.random() * 45) + 1;
+      } while (numbers.indexOf(bonusNum) !== -1);
+      bonus = bonusNum;
     }
-
-    return { numbers, bonus };
+    return { numbers: numbers, bonus: bonus };
   }
 
   function createBall(number) {
-    const ball = document.createElement('div');
-    ball.className = `ball ${getColor(number)}`;
+    var ball = document.createElement('div');
+    ball.className = 'ball ' + getColor(number);
     ball.textContent = number;
     return ball;
   }
 
   function generateLotto() {
-    const lottoList = document.getElementById('lottoList');
-    const includeBonus = document.getElementById('bonusCheck').checked;
-
+    var lottoList = document.getElementById('lottoList');
+    var includeBonus = document.getElementById('bonusCheck').checked;
     lottoList.innerHTML = '';
 
-    for (let i = 1; i <= 5; i++) {
-      const { numbers, bonus } = generateNumbers(includeBonus);
+    for (var i = 1; i <= 5; i++) {
+      var result = generateNumbers(includeBonus);
+      var numbers = result.numbers;
+      var bonus = result.bonus;
 
-      const row = document.createElement('div');
+      var row = document.createElement('div');
       row.className = 'lotto-row';
 
-      const title = document.createElement('div');
+      var title = document.createElement('div');
       title.className = 'row-title';
-      title.textContent = `${i}번`;
+      title.textContent = i + '번';
       row.appendChild(title);
 
-      numbers.forEach(num => row.appendChild(createBall(num)));
+      numbers.forEach(function(num) { row.appendChild(createBall(num)); });
 
       if (includeBonus && bonus !== null) {
-        const bonusLabel = document.createElement('span');
+        var bonusLabel = document.createElement('span');
         bonusLabel.className = 'bonus-label';
         bonusLabel.textContent = '+';
         row.appendChild(bonusLabel);
