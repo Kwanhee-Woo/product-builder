@@ -1,32 +1,62 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>로또 번호 자동 생성기</title>
 
   <style>
+    :root {
+      --bg: #f4f6f9;
+      --container-bg: #ffffff;
+      --shadow: rgba(0,0,0,0.1);
+      --title-color: #222222;
+      --text-color: #333333;
+      --row-title-color: #555555;
+      --row-bg: #f9fafb;
+      --bonus-color: #e11d48;
+      --toggle-bg: #e2e8f0;
+      --toggle-border: #cbd5e1;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --container-bg: #1e293b;
+      --shadow: rgba(0,0,0,0.5);
+      --title-color: #f1f5f9;
+      --text-color: #cbd5e1;
+      --row-title-color: #94a3b8;
+      --row-bg: #334155;
+      --bonus-color: #fb7185;
+      --toggle-bg: #334155;
+      --toggle-border: #475569;
+    }
+
     body {
       font-family: 'Pretendard', sans-serif;
-      background: #f4f6f9;
+      background: var(--bg);
       margin: 0;
       padding: 40px;
       display: flex;
       justify-content: center;
+      transition: background 0.3s;
     }
 
     .container {
       width: 700px;
-      background: white;
+      background: var(--container-bg);
       border-radius: 20px;
       padding: 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 30px var(--shadow);
+      transition: background 0.3s, box-shadow 0.3s;
+      position: relative;
     }
 
     h1 {
       text-align: center;
       margin-bottom: 30px;
-      color: #222;
+      color: var(--title-color);
+      transition: color 0.3s;
     }
 
     .controls {
@@ -46,7 +76,7 @@
       border-radius: 10px;
       font-size: 16px;
       cursor: pointer;
-      transition: 0.2s;
+      transition: background 0.2s;
     }
 
     button:hover {
@@ -55,9 +85,76 @@
 
     .checkbox-wrap {
       font-size: 16px;
-      color: #333;
+      color: var(--text-color);
+      transition: color 0.3s;
     }
 
+    /* 다크모드 토글 */
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-label {
+      font-size: 13px;
+      color: var(--text-color);
+      transition: color 0.3s;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--toggle-bg);
+      border: 1.5px solid var(--toggle-border);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .toggle-track::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch input:checked + .toggle-track {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+
+    .toggle-switch input:checked + .toggle-track::before {
+      transform: translate(22px, -50%);
+    }
+
+    .theme-icon {
+      font-size: 16px;
+    }
+
+    /* 로또 목록 */
     .lotto-list {
       display: flex;
       flex-direction: column;
@@ -65,19 +162,21 @@
     }
 
     .lotto-row {
-      background: #f9fafb;
+      background: var(--row-bg);
       border-radius: 14px;
       padding: 15px;
       display: flex;
       align-items: center;
       flex-wrap: wrap;
       gap: 10px;
+      transition: background 0.3s;
     }
 
     .row-title {
       width: 70px;
       font-weight: bold;
-      color: #555;
+      color: var(--row-title-color);
+      transition: color 0.3s;
     }
 
     .ball {
@@ -95,16 +194,19 @@
     .bonus-label {
       margin-left: 8px;
       font-weight: bold;
-      color: #e11d48;
+      color: var(--bonus-color);
+      transition: color 0.3s;
     }
 
     .yellow { background: #f59e0b; }
-    .blue { background: #3b82f6; }
-    .red { background: #ef4444; }
-    .gray { background: #6b7280; }
-    .green { background: #10b981; }
+    .blue   { background: #3b82f6; }
+    .red    { background: #ef4444; }
+    .gray   { background: #6b7280; }
+    .green  { background: #10b981; }
 
     @media (max-width: 768px) {
+      body { padding: 20px; }
+
       .container {
         width: 100%;
       }
@@ -120,6 +222,16 @@
 <body>
 
 <div class="container">
+  <!-- 다크/라이트 모드 토글 -->
+  <div class="theme-toggle">
+    <span class="theme-icon">☀️</span>
+    <label class="toggle-switch">
+      <input type="checkbox" id="themeToggle" />
+      <span class="toggle-track"></span>
+    </label>
+    <span class="theme-icon">🌙</span>
+  </div>
+
   <h1>🎰 로또 번호 자동 생성기</h1>
 
   <div class="controls">
@@ -137,6 +249,23 @@
 </div>
 
 <script>
+  const html = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+
+  // 저장된 테마 불러오기
+  const saved = localStorage.getItem('theme') || 'light';
+  setTheme(saved);
+
+  toggle.addEventListener('change', () => {
+    setTheme(toggle.checked ? 'dark' : 'light');
+  });
+
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    toggle.checked = (theme === 'dark');
+    localStorage.setItem('theme', theme);
+  }
+
   function getColor(number) {
     if (number <= 10) return 'yellow';
     if (number <= 20) return 'blue';
@@ -150,24 +279,16 @@
 
     while (numbers.length < 6) {
       const num = Math.floor(Math.random() * 45) + 1;
-
-      if (!numbers.includes(num)) {
-        numbers.push(num);
-      }
+      if (!numbers.includes(num)) numbers.push(num);
     }
 
     numbers.sort((a, b) => a - b);
 
     let bonus = null;
-
     if (includeBonus) {
       while (true) {
         const bonusNum = Math.floor(Math.random() * 45) + 1;
-
-        if (!numbers.includes(bonusNum)) {
-          bonus = bonusNum;
-          break;
-        }
+        if (!numbers.includes(bonusNum)) { bonus = bonusNum; break; }
       }
     }
 
@@ -198,16 +319,13 @@
       title.textContent = `${i}번`;
       row.appendChild(title);
 
-      numbers.forEach(num => {
-        row.appendChild(createBall(num));
-      });
+      numbers.forEach(num => row.appendChild(createBall(num)));
 
       if (includeBonus && bonus !== null) {
         const bonusLabel = document.createElement('span');
         bonusLabel.className = 'bonus-label';
         bonusLabel.textContent = '+';
         row.appendChild(bonusLabel);
-
         row.appendChild(createBall(bonus));
       }
 
@@ -215,7 +333,6 @@
     }
   }
 
-  // 첫 실행 시 자동 생성
   generateLotto();
 </script>
 
