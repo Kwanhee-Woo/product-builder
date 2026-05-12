@@ -1,14 +1,223 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>로또 번호 자동 생성기</title>
+
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 700px;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #222;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .checkbox-wrap {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .lotto-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .lotto-row {
+      background: #f9fafb;
+      border-radius: 14px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .row-title {
+      width: 70px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .ball {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .bonus-label {
+      margin-left: 8px;
+      font-weight: bold;
+      color: #e11d48;
+    }
+
+    .yellow { background: #f59e0b; }
+    .blue { background: #3b82f6; }
+    .red { background: #ef4444; }
+    .gray { background: #6b7280; }
+    .green { background: #10b981; }
+
+    @media (max-width: 768px) {
+      .container {
+        width: 100%;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+
+<div class="container">
+  <h1>🎰 로또 번호 자동 생성기</h1>
+
+  <div class="controls">
+    <button onclick="generateLotto()">
+      번호 5개 자동 생성
+    </button>
+
+    <label class="checkbox-wrap">
+      <input type="checkbox" id="bonusCheck" />
+      보너스 번호 포함
+    </label>
+  </div>
+
+  <div class="lotto-list" id="lottoList"></div>
+</div>
+
+<script>
+  function getColor(number) {
+    if (number <= 10) return 'yellow';
+    if (number <= 20) return 'blue';
+    if (number <= 30) return 'red';
+    if (number <= 40) return 'gray';
+    return 'green';
+  }
+
+  function generateNumbers(includeBonus) {
+    const numbers = [];
+
+    while (numbers.length < 6) {
+      const num = Math.floor(Math.random() * 45) + 1;
+
+      if (!numbers.includes(num)) {
+        numbers.push(num);
+      }
+    }
+
+    numbers.sort((a, b) => a - b);
+
+    let bonus = null;
+
+    if (includeBonus) {
+      while (true) {
+        const bonusNum = Math.floor(Math.random() * 45) + 1;
+
+        if (!numbers.includes(bonusNum)) {
+          bonus = bonusNum;
+          break;
+        }
+      }
+    }
+
+    return { numbers, bonus };
+  }
+
+  function createBall(number) {
+    const ball = document.createElement('div');
+    ball.className = `ball ${getColor(number)}`;
+    ball.textContent = number;
+    return ball;
+  }
+
+  function generateLotto() {
+    const lottoList = document.getElementById('lottoList');
+    const includeBonus = document.getElementById('bonusCheck').checked;
+
+    lottoList.innerHTML = '';
+
+    for (let i = 1; i <= 5; i++) {
+      const { numbers, bonus } = generateNumbers(includeBonus);
+
+      const row = document.createElement('div');
+      row.className = 'lotto-row';
+
+      const title = document.createElement('div');
+      title.className = 'row-title';
+      title.textContent = `${i}번`;
+      row.appendChild(title);
+
+      numbers.forEach(num => {
+        row.appendChild(createBall(num));
+      });
+
+      if (includeBonus && bonus !== null) {
+        const bonusLabel = document.createElement('span');
+        bonusLabel.className = 'bonus-label';
+        bonusLabel.textContent = '+';
+        row.appendChild(bonusLabel);
+
+        row.appendChild(createBall(bonus));
+      }
+
+      lottoList.appendChild(row);
+    }
+  }
+
+  // 첫 실행 시 자동 생성
+  generateLotto();
+</script>
+
 </body>
 </html>
